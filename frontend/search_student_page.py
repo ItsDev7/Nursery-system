@@ -9,6 +9,7 @@ import unicodedata
 import customtkinter as ctk
 from .student_details_popup import StudentDetailsPopup
 from .teacher_details_popup import TeacherDetailsPopup
+from .edit_teacher_page import EditTeacherPage  # Import the new edit teacher page
 
 class SearchStudentPage:
     def __init__(self, main_window, on_back=None):
@@ -166,7 +167,7 @@ class SearchStudentPage:
                     else:
                         # زر تعديل للمعلمة
                         CTkButton(action_frame, text=self.arabic("تعديل"), fg_color="green", width=50,
-                        command=lambda t=person: self.edit_teacher_popup(t)).grid(row=0, column=0, padx=2)
+                        command=lambda t=person: self.open_edit_teacher_page(t)).grid(row=0, column=0, padx=2)
                         # زر حذف للمعلمة
                         delete_button = CTkButton(action_frame, text=self.arabic("حذف"), fg_color="red", width=50,
                                                   command=lambda name=person["name"]: self.delete_teacher(name))
@@ -299,7 +300,12 @@ class SearchStudentPage:
         ctk.CTkButton(btns, text="إلغاء", fg_color="#ff3333", text_color="#fff", font=("Arial", 14, "bold"), command=salary_win.destroy).pack(side="right", padx=8, pady=2, ipadx=10, ipady=4)
         salary_win.protocol("WM_DELETE_WINDOW", salary_win.destroy)
 
-    def edit_teacher_popup(self, teacher):
-        # Placeholder for edit teacher logic
-        from tkinter import messagebox
-        messagebox.showinfo("تعديل المعلمة", "سيتم تنفيذ صفحة التعديل لاحقًا")
+    def open_edit_teacher_page(self, teacher):
+        """Open the edit teacher page."""
+        # Clear the current content frame
+        for widget in self.main.winfo_children():
+            widget.destroy()
+            
+        # Create and pack the EditTeacherPage instance
+        self.current_page = EditTeacherPage(self.main, teacher, on_back=self.go_back)
+        self.current_page.pack(fill="both", expand=True)

@@ -456,3 +456,26 @@ def delete_activity(activity_id):
     cursor.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
     conn.commit()
     conn.close()
+
+def update_teacher_by_id(teacher_id, name, nid, term, gender, phone1, phone2):
+    """
+    Update teacher details by teacher ID.
+
+    Args:
+        teacher_id: The ID of the teacher to update.
+        name: New name.
+        nid: New National ID.
+        term: New academic term.
+        gender: New gender.
+        phone1: New primary phone number.
+        phone2: New secondary phone number.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE teachers
+        SET name=?, nid=?, term=?, gender=?, phone1=?, phone2=?
+        WHERE id=?
+    """, (name, nid, term, gender, phone1, phone2, teacher_id))
+    conn.commit()
+    conn.close()
