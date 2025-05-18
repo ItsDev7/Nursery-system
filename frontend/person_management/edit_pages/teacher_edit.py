@@ -4,8 +4,9 @@ Page for editing teacher details.
 import customtkinter as ctk
 from tkinter import messagebox
 from backend.database import update_teacher_by_id
-from typing import Callable, Dict, Any
+from typing import Callable, Dict, Any, Optional
 import tkinter as tk
+from ..constants import ACADEMIC_LEVELS, GENDER_OPTIONS, BACK_BUTTON_STYLE
 
 class EditTeacherPage(ctk.CTkFrame):
     """UI for editing existing teacher details."""
@@ -20,7 +21,7 @@ class EditTeacherPage(ctk.CTkFrame):
             on_back: Callback function to return to the previous page.
         """
         super().__init__(master)
-        self.master = master # Keep master reference if needed elsewhere
+        self.master = master
         self.on_back = on_back
         self.teacher_data = teacher_data
         self.setup_ui()
@@ -31,14 +32,8 @@ class EditTeacherPage(ctk.CTkFrame):
 
     def setup_ui(self):
         """Set up the UI components for the edit teacher page."""
-        # Clear existing widgets in the master frame is handled by the caller (search_student_page.py)
-
         # The frame is now 'self' because the class inherits from CTkFrame
         self.grid(row=0, column=0, sticky="nsew", padx=80, pady=40)
-        # Assuming master is already configured to expand
-        # self.master.grid_rowconfigure(0, weight=1)
-        # self.master.grid_columnconfigure(0, weight=1)
-
         # Configure grid for the EditTeacherPage frame itself
         self.grid_rowconfigure(0, weight=1)
         for i in range(2):
@@ -86,24 +81,26 @@ class EditTeacherPage(ctk.CTkFrame):
         ctk.CTkLabel(self, text=self.arabic(":الفصل الدراسي"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=5, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         ctk.CTkLabel(self, text=self.arabic(":الجنس"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=5, column=0, sticky="e", pady=(10, 2), padx=(0, 10))
 
-        levels = [self.arabic(level) for level in ["التمهيدي", "الاول المستوى", "الثاني المستوى", "الصغار فصل", "يومي اشتراك"]]
+        # Levels from constants
+        levels = [self.arabic(level) for level in ACADEMIC_LEVELS if level != "الجميع"]
         self.term_var = tk.StringVar(value=self.teacher_data.get("term", levels[0] if levels else ""))
         self.term_menu = ctk.CTkOptionMenu(self, values=levels, variable=self.term_var)
         self.term_menu.grid(row=6, column=1, sticky="ew", pady=5, padx=(0, 10))
 
-        genders = [self.arabic("أنثى"), self.arabic("ذكر")] # Assuming female is primary for teachers
+        # Genders from constants
+        genders = [self.arabic(GENDER_OPTIONS["male"]), self.arabic(GENDER_OPTIONS["female"])]
         self.gender_var = tk.StringVar(value=self.teacher_data.get("gender", genders[0] if genders else ""))
         self.gender_menu = ctk.CTkOptionMenu(self, values=genders, variable=self.gender_var)
         self.gender_menu.grid(row=6, column=0, sticky="ew", pady=5, padx=(0, 10))
 
-        # Primary Phone
-        ctk.CTkLabel(self, text=self.arabic(":هاتف المعلمة"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=7, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
+        # Primary phone
+        ctk.CTkLabel(self, text=self.arabic(":هاتف"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=7, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         self.phone1_entry = ctk.CTkEntry(self, width=300, justify="right", font=("Arial", 14))
         self.phone1_entry.insert(0, self.teacher_data.get("phone1", ""))
         self.phone1_entry.grid(row=8, column=0, columnspan=2, pady=5, sticky="ew")
 
-        # Secondary Phone
-        ctk.CTkLabel(self, text=self.arabic(":هاتف آخر*"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=9, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
+        # Secondary phone
+        ctk.CTkLabel(self, text=self.arabic(":هاتف آخر"), font=("Arial", 16, "bold"), anchor="e", justify="right").grid(row=9, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         self.phone2_entry = ctk.CTkEntry(self, width=300, justify="right", font=("Arial", 14))
         self.phone2_entry.insert(0, self.teacher_data.get("phone2", ""))
         self.phone2_entry.grid(row=10, column=0, columnspan=2, pady=5, sticky="ew")
@@ -129,19 +126,21 @@ class EditTeacherPage(ctk.CTkFrame):
         phone1 = self.phone1_entry.get().strip()
         phone2 = self.phone2_entry.get().strip()
 
-        if not all([name, nid, term, gender, phone1]) and not phone2:
-             messagebox.showerror("خطأ", self.arabic("من فضلك املأ الحقول المطلوبة على الأقل (الاسم، الرقم القومي، الفصل، الجنس، هاتف المعلمة)"))
-             return
+        # Basic validation
+        if not all([name, nid, term, gender, phone1]):
+            messagebox.showerror(self.arabic("خطأ"), self.arabic("من فضلك املأ الحقول المطلوبة على الأقل (الاسم، الرقم القومي، الفصل، الجنس، هاتف)"))
+            return
 
+        # Call database update function
         update_teacher_by_id(teacher_id, name, nid, term, gender, phone1, phone2)
 
-        messagebox.showinfo("تم", self.arabic("تم تحديث بيانات المعلمة بنجاح"))
+        messagebox.showinfo(self.arabic("تم"), self.arabic("تم تحديث بيانات المعلمة بنجاح"))
 
-        # Go back to search page and refresh
+        # Go back to previous page (search page) and potentially refresh
         self.go_back()
 
     def go_back(self):
-        """Clear the current frame and go back to the previous page (search page)."""
+        """Clear the current frame and go back to the previous page."""
         # Clearing is handled by the caller before creating this page
         if self.on_back:
             self.on_back() 

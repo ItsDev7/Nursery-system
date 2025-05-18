@@ -1,16 +1,24 @@
+"""
+Main application window and navigation.
+"""
+import customtkinter as ctk
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkImage, CTkScrollableFrame, CTkProgressBar, CTkEntry
 from PIL import Image
 import os
 from pathlib import Path
 import sqlite3
 from .register_student_page import RegisterStudentPage
-from .search_student_page import SearchStudentPage
-from .fees_page import FeesPage
+from .fees.views import FeesPage
 from .register_teacher_page import RegisterTeacherPage
 from .statistics_page import StatisticsPage
 from backend.database import get_all_activities, add_activity, update_activity, delete_activity
 from datetime import datetime
 from tkinter import messagebox
+from .person_management.search_page import SearchPage
+from .person_management.edit_pages.student_edit import EditStudentPage
+from .person_management.edit_pages.teacher_edit import EditTeacherPage
+from .person_management.student_details_popup import StudentDetailsPopup
+from .person_management.teacher_details_popup import TeacherDetailsPopup
 
 class NextPage:
     def __init__(self, main_window):
@@ -31,7 +39,7 @@ class NextPage:
 
     def open_search_student_page(self):
         self.clear_content_frame()
-        self.current_page = SearchStudentPage(self.content_frame, on_back=self.show_dashboard)
+        self.current_page = SearchPage(self.content_frame, on_back=self.show_dashboard)
         self.highlight_active_nav_button("search")
 
     def open_fees_page(self):

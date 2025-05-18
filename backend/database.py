@@ -336,10 +336,29 @@ def add_teacher_salary(teacher_id, amount, date):
 def get_teacher_salaries(teacher_id):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT amount, date FROM teacher_salaries WHERE teacher_id = ? ORDER BY date DESC", (teacher_id,))
+    cursor.execute("SELECT id, amount, date FROM teacher_salaries WHERE teacher_id = ? ORDER BY date DESC", (teacher_id,))
     data = cursor.fetchall()
     conn.close()
     return data
+
+def update_teacher_salary(salary_id: int, new_amount: float, new_date: str):
+    """
+    Update a teacher's salary record.
+    
+    Args:
+        salary_id: The ID of the salary record to update
+        new_amount: The new salary amount
+        new_date: The new date in DD-MM-YYYY format
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE teacher_salaries
+        SET amount = ?, date = ?
+        WHERE id = ?
+    """, (new_amount, new_date, salary_id))
+    conn.commit()
+    conn.close()
 
 def get_total_teacher_salaries():
     conn = get_connection()
@@ -477,5 +496,19 @@ def update_teacher_by_id(teacher_id, name, nid, term, gender, phone1, phone2):
         SET name=?, nid=?, term=?, gender=?, phone1=?, phone2=?
         WHERE id=?
     """, (name, nid, term, gender, phone1, phone2, teacher_id))
+    conn.commit()
+    conn.close()
+
+def delete_teacher_by_name(name: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM teachers WHERE name = ?", (name,))
+    conn.commit()
+    conn.close()
+
+def delete_teacher_by_id(teacher_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM teachers WHERE id = ?", (teacher_id,))
     conn.commit()
     conn.close()
