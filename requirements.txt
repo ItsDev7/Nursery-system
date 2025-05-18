@@ -1,0 +1,6 @@
+customtkinter
+Pillow
+arabic-reshaper
+python-bidi
+matplotlib
+SQLAlchemy 
