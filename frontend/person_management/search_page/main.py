@@ -1,11 +1,13 @@
-"""
-Main search page implementation.
+"""Search page implementation.
+
+This module provides the user interface for searching, viewing, editing, and deleting
+student and teacher records.
 """
 import customtkinter as ctk
 from tkinter import messagebox
-from typing import Callable, Dict, Any, Optional, List
+from typing import Callable, Dict, Any, List
 import tkinter as tk
-from ..constants import SEARCH_MODES, ACADEMIC_LEVELS, GENDER_OPTIONS, BACK_BUTTON_STYLE, SEARCH_BUTTON_STYLE, ACTION_BUTTON_STYLE, SALARY_BUTTON_STYLE, TABLE_HEADER_STYLE, TABLE_ROW_STYLE
+from ..constants import SEARCH_MODES, ACADEMIC_LEVELS, SEARCH_BUTTON_STYLE, ACTION_BUTTON_STYLE, SALARY_BUTTON_STYLE, TABLE_HEADER_STYLE, TABLE_ROW_STYLE
 from ..student_details_popup import StudentDetailsPopup
 from ..teacher_details_popup import TeacherDetailsPopup
 from ..edit_pages.student_edit import EditStudentPage
@@ -14,11 +16,15 @@ from backend.database import get_all_students, get_all_teachers, delete_student_
 from ..teacher_salary_popup import TeacherSalaryPopup
 
 class SearchPage(ctk.CTkFrame):
-    """Main search interface for finding and managing students and teachers."""
+    """Main search interface for finding and managing students and teachers.
+    
+    Allows switching between student and teacher search modes, applying filters
+    by name and academic level, and performing actions like viewing details,
+    editing, and deleting records.
+    """
 
     def __init__(self, master, on_back: Callable = None):
-        """
-        Initialize the search page.
+        """Initialize the search page.
 
         Args:
             master: The parent widget.
@@ -32,24 +38,42 @@ class SearchPage(ctk.CTkFrame):
         self.after(100, self.search)
 
     def arabic(self, text: str) -> str:
+        """Handles potential Arabic text display issues.
+        
+        Args:
+            text: The input string which may contain Arabic characters.
+            
+        Returns:
+            The processed string for display (identity function if no processing needed).
+        """
         # Assuming Arabic reshaping/bidi handling is done elsewhere or not needed here
         return text
 
     def setup_ui(self):
-        """Set up the UI components for the search page."""
+        """Sets up the main UI components for the search page.
+        
+        Includes the top bar, search filters, and the scrollable results frame.
+        """
         # The frame is now 'self' because the class inherits from CTkFrame
         self.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
-        # Configure rows for top bar, filters, fixed header, and scrollable results
-        self.grid_rowconfigure(0, weight=0) # Top bar
-        self.grid_rowconfigure(1, weight=0) # Filters
-        self.grid_rowconfigure(2, weight=1) # Scrollable results (expandable)
-        self.grid_columnconfigure(0, weight=1) # Make the main column expandable
+        # Configure grid for layout: top bar, filters, and expandable results area
+        self.grid_rowconfigure(0, weight=0) # Top bar (fixed height)
+        self.grid_rowconfigure(1, weight=0) # Filters (fixed height)
+        self.grid_rowconfigure(2, weight=1) # Scrollable results (expands vertically)
+        self.grid_columnconfigure(0, weight=1) # Allow the main column to expand horizontally
 
-        # Top bar with back button and search mode
+        # Set up individual UI sections
+        self._setup_top_bar()
+        self._setup_filters()
+        self._setup_results_frame()
+
+    def _setup_top_bar(self):
+        """Sets up the top bar with back button and search mode selector."""
         top_bar = ctk.CTkFrame(self)
         top_bar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        top_bar.grid_columnconfigure(0, weight=0) # Back button column
-        top_bar.grid_columnconfigure(1, weight=1) # Title column (if any), allow it to expand
+        # Configure grid within top_bar for RTL layout: [Back Button] [Title (if any)] [Mode Selector]
+        top_bar.grid_columnconfigure(0, weight=0) # Back button column (fixed size)
+        top_bar.grid_columnconfigure(1, weight=1) # Title column (expands)
         top_bar.grid_columnconfigure(2, weight=0) # Mode selector column (fixed size)
 
         # Back button
@@ -66,9 +90,9 @@ class SearchPage(ctk.CTkFrame):
                 corner_radius=20,
                 command=self.go_back
             )
-            back_icon.grid(row=0, column=0, sticky="w", padx=(0, 10))
+            back_icon.grid(row=0, column=0, sticky="w", padx=(0, 10)) # Place on the left
 
-        # Search mode selector (placed on the right)
+        # Search mode selector (placed on the right for RTL)
         self.mode_var = tk.StringVar(value=SEARCH_MODES[0])
         self.mode_menu = ctk.CTkOptionMenu(
             top_bar,
@@ -76,110 +100,139 @@ class SearchPage(ctk.CTkFrame):
             variable=self.mode_var,
             command=self.on_mode_change
         )
-        self.mode_menu.grid(row=0, column=2, sticky="e") # Placed on the rightmost column
+        self.mode_menu.grid(row=0, column=2, sticky="e") # Place on the rightmost column
 
-        # Search filters
+    def _setup_filters(self):
+        """Sets up the search filter components."""
         filters_frame = ctk.CTkFrame(self)
         filters_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-        # Configure columns for RTL (Academic Level Label | Academic Level Menu | Name Entry | Search Button)
-        filters_frame.grid_columnconfigure(0, weight=0) # Academic Level Label (fixed size)
-        filters_frame.grid_columnconfigure(1, weight=1) # Academic Level Menu (expands)
-        filters_frame.grid_columnconfigure(2, weight=1) # Name Entry (expands more)
+        # Configure grid within filters_frame for RTL layout: [Academic Level Menu] [Academic Level Label] [Name Entry] [Search Button]
+        filters_frame.grid_columnconfigure(0, weight=1) # Academic Level Menu (expands)
+        filters_frame.grid_columnconfigure(1, weight=0) # Academic Level Label (fixed size)
+        filters_frame.grid_columnconfigure(2, weight=1) # Name Entry (expands more than level menu)
         filters_frame.grid_columnconfigure(3, weight=0) # Search Button (fixed size)
 
         # Search Button (RTL: Placed on the far right)
         self.search_button = ctk.CTkButton(
             filters_frame,
-            text=self.arabic("بحث"),
+            text=self.arabic("بحث"), # "Search"
             command=self.search,
             **SEARCH_BUTTON_STYLE
         )
         self.search_button.grid(row=0, column=3, padx=5, sticky="e") # Placed on the right
 
         # Name filter (RTL: Entry to the left of Search Button)
-        self.name_entry = ctk.CTkEntry(filters_frame, width=300, justify="right", font=("Arial", 14), placeholder_text=self.arabic("اسم الطالب أو المعلمة")) # Updated placeholder
+        self.name_entry = ctk.CTkEntry(filters_frame, width=300, justify="right", 
+                                        font=("Arial", 14), placeholder_text=self.arabic("اسم الطالب أو المعلمة")) # "Student or Teacher Name"
         self.name_entry.grid(row=0, column=2, padx=5, sticky="ew") # Placed to the left of Search Button
 
         # Academic level filter (RTL: Label to the left of Name Entry, Menu to the left of Label)
         ctk.CTkLabel(filters_frame, text=self.arabic(":المستوى الدراسي"), font=("Arial", 14)).grid(row=0, column=1, padx=5, sticky="e") # Label to the right of menu
-        self.level_var = tk.StringVar(value=ACADEMIC_LEVELS[0])
+        # Levels from constants, excluding the "All" option for display in dropdown
+        levels = [self.arabic(level) for level in ACADEMIC_LEVELS if level != "الجميع"] # Filter out "All"
+        # Reverse levels for RTL display in dropdown if needed (depends on CTkOptionMenu behavior)
+        # levels.reverse() # Consider reversing if dropdown order is incorrect
+        self.level_var = tk.StringVar(value=self.arabic(ACADEMIC_LEVELS[0])) # Default to "All"
         self.level_menu = ctk.CTkOptionMenu(
             filters_frame,
-            values=[self.arabic(level) for level in ACADEMIC_LEVELS],
+            values=levels, # Use filtered levels
             variable=self.level_var
         )
         self.level_menu.grid(row=0, column=0, padx=5, sticky="ew") # Menu on the far left
 
-        # Scrollable results frame
-        self.results_scroll_frame = ctk.CTkScrollableFrame(self, height=385) # Set height to show approx 11 rows (11 * 35)
-        self.results_scroll_frame.grid(row=2, column=0, sticky="nsew") # Placed in row 2 now
+    def _setup_results_frame(self):
+        """Sets up the scrollable frame to display search results."""
+        # Scrollable frame for results. Height adjusted to fit approx 11 rows.
+        self.results_scroll_frame = ctk.CTkScrollableFrame(self, height=385)
+        self.results_scroll_frame.grid(row=2, column=0, sticky="nsew") # Place in row 2, expanding to fill space
         # Ensure the inner frame within the scrollable frame expands
         self.results_scroll_frame.grid_columnconfigure(0, weight=1)
 
     def setup_results_table(self):
-        """Set up the results table headers."""
-        # Headers will now be added directly in the display methods (display_student_results, display_teacher_results)
-        pass # This method is no longer needed for fixed headers
+        """This method is no longer used for setting up table headers."
+        
+        Headers are now handled directly within display_student_results and display_teacher_results.
+        """
+        pass
 
     def on_mode_change(self, _=None):
-        """Handle search mode change."""
+        """Handles the event when the search mode (Student/Teacher) is changed.
+        
+        Triggers a new search based on the selected mode.
+        
+        Args:
+            _: Event data (ignored).
+        """
         # No need to call setup_results_table() here anymore
         self.search()
 
     def search(self):
-        """Perform search based on current filters."""
-        name = self.name_entry.get().strip()
-        level = self.level_var.get()
+        """Performs the search operation based on current filters and mode.
+        
+        Retrieves data from the database and displays the results in the scrollable frame.
+        """
+        name_filter = self.name_entry.get().strip()
+        level_filter = self.level_var.get()
         mode = self.mode_var.get()
 
         # Clear previous results from the scrollable frame
         for widget in self.results_scroll_frame.winfo_children():
             widget.destroy()
 
-        # Perform search and filter results
-        if mode == self.arabic(SEARCH_MODES[0]):  # Students
+        # Perform search and filter results based on mode
+        if mode == self.arabic(SEARCH_MODES[0]):  # Students mode
             all_students = get_all_students()
+            # Filter students by name (case-insensitive) and academic level
             results = [s for s in all_students if
-                       (not name or name.lower() in s.get("name", "").lower()) and # Search only by name
-                       (level == self.arabic(ACADEMIC_LEVELS[0]) or self.arabic(s.get("term", "")) == level)]
+                       (not name_filter or name_filter.lower() in s.get("name", "").lower()) and # Search only by name
+                       (level_filter == self.arabic(ACADEMIC_LEVELS[0]) or self.arabic(s.get("term", "")) == level_filter)]
             self.display_student_results(results)
-        else:  # Teachers
+        else:  # Teachers mode
             all_teachers = get_all_teachers()
+            # Filter teachers by name (case-insensitive) and academic level
             results = [t for t in all_teachers if
-                       (not name or name.lower() in t.get("name", "").lower()) and # Search only by name
-                       (level == self.arabic(ACADEMIC_LEVELS[0]) or self.arabic(t.get("term", "")) == level)]
+                       (not name_filter or name_filter.lower() in t.get("name", "").lower()) and # Search only by name
+                       (level_filter == self.arabic(ACADEMIC_LEVELS[0]) or self.arabic(t.get("term", "")) == level_filter)]
             self.display_teacher_results(results)
 
     def display_student_results(self, students: List[Dict[str, Any]]):
-        """Display student search results with headers inside the scrollable frame."""
-        # Define headers for student results (order changed)
-        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"]
-        # Map header index to RTL grid column index (adjusted indices)
-        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3}
+        """Displays the student search results in a table format.
+        
+        Args:
+            students: A list of dictionaries, each representing a student record.
+        """
+        # Define headers for student results (order adjusted for RTL display)
+        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number
+        # Map logical header order to RTL grid column index (0 is leftmost, increases to the right)
+        # The physical column index will be from right to left for display
+        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3} # Actions -> Col 0, Name -> Col 2, Term -> Col 1, Serial -> Col 3
 
         # Create header row frame inside the scrollable frame
         header_frame = ctk.CTkFrame(self.results_scroll_frame, fg_color="gray50") # Add a background color for header
-        # Place the header frame within the scrollable frame
+        # Place the header frame within the scrollable frame, spanning the full width
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
 
-        # Configure columns for RTL (Action | Name | Term | Serial)
+        # Configure columns for RTL table layout within the header frame (Action | Term | Name | Serial)
         # Weights adjusted to distribute space more evenly among data columns
-        # These weights must match the weights in the row frames below
+        # These weights must match the weights in the data row frames below
         header_frame.grid_columnconfigure(0, weight=0) # Action buttons column (fixed width/minimal weight)
-        header_frame.grid_columnconfigure(1, weight=1) # Term
-        header_frame.grid_columnconfigure(2, weight=2) # Name (Name usually takes more space)
-        header_frame.grid_columnconfigure(3, weight=0) # Serial Number (fixed width/minimal weight)
+        header_frame.grid_columnconfigure(1, weight=1) # Term column (expands)
+        header_frame.grid_columnconfigure(2, weight=2) # Name column (expands more)
+        header_frame.grid_columnconfigure(3, weight=0) # Serial Number column (fixed width/minimal weight)
 
         # Place headers from right to left using the map
-        for i, header in enumerate(headers):
-            col_index = header_column_map_rtl[i]
-            ctk.CTkLabel(
-                header_frame,
-                text=self.arabic(header),
-                **TABLE_HEADER_STYLE
-            ).grid(row=0, column=col_index, padx=5, sticky="nsew") # Use nsew sticky for better alignment
+        # We iterate through the desired display order of headers and place them in the corresponding RTL grid column
+        display_headers_rtl_order = [headers[3], headers[2], headers[1], headers[0]] # Serial, Term, Name, Actions
+        display_columns_rtl_order = [3, 2, 1, 0] # Corresponding grid columns from right to left
 
-        # Start row index for data from 1 (after header row)
+        for i, header_text in enumerate(display_headers_rtl_order):
+             ctk.CTkLabel(
+                header_frame,
+                text=self.arabic(header_text),
+                **TABLE_HEADER_STYLE
+            ).grid(row=0, column=display_columns_rtl_order[i], padx=5, sticky="nsew") # Use nsew sticky for better alignment
+
+        # Display student data rows starting from row 1 (after header)
         for i, student in enumerate(students, start=1):
             row_frame = ctk.CTkFrame(self.results_scroll_frame)
             # Place the row frame within the scrollable frame, spanning the full width
@@ -187,27 +240,28 @@ class SearchPage(ctk.CTkFrame):
             self.results_scroll_frame.grid_rowconfigure(i, weight=1)
             row_frame.grid(row=i, column=0, sticky="ew", pady=2)
 
-            # Configure columns for RTL (Action | Name | Term | Serial)
+            # Configure columns for RTL table layout within the row frame (Action | Term | Name | Serial)
             # These weights must match the weights in the header frame
-            row_frame.grid_columnconfigure(0, weight=0) # Action buttons column (fixed width/minimal weight)
-            row_frame.grid_columnconfigure(1, weight=1) # Term
-            row_frame.grid_columnconfigure(2, weight=2) # Name (Name usually takes more space)
-            row_frame.grid_columnconfigure(3, weight=0) # Serial Number (fixed width/minimal weight)
+            row_frame.grid_columnconfigure(0, weight=0) # Action buttons column
+            row_frame.grid_columnconfigure(1, weight=1) # Term column
+            row_frame.grid_columnconfigure(2, weight=2) # Name column
+            row_frame.grid_columnconfigure(3, weight=0) # Serial Number column
 
-            # Student data (Place from right to left - Name, Term) + Serial (far right) + Actions (far left)
-            data_order = ["name", "term"]
-            # The order to display data fields corresponding to columns from left to right (Serial, Name, Term)
-            display_order = [3, 2, 1] # Adjusted column indices for Serial, Name, Term
-
-            # Display Serial Number
+            # Display Serial Number (far right column in RTL grid)
             ctk.CTkLabel(row_frame, text=str(i), **TABLE_ROW_STYLE).grid(row=0, column=3, padx=5, sticky="nsew")
 
-            # Display data fields (Name, Term)
-            # Adjusted placement for Name and Term based on new display_order
-            ctk.CTkLabel(row_frame, text=self.arabic(student.get("name", "")), **TABLE_ROW_STYLE).grid(row=0, column=2, padx=5, sticky="nsew")
-            ctk.CTkLabel(row_frame, text=self.arabic(student.get("term", "")), **TABLE_ROW_STYLE).grid(row=0, column=1, padx=5, sticky="nsew")
+            # Display Name (reversed for RTL display, placed in the middle-right column)
+            original_name = student.get("name", "")
+            name_parts = original_name.split()
+            reversed_name_parts = name_parts[::-1] # Reverse the list of parts
+            reversed_name = " ".join(reversed_name_parts) # Join parts with space
+            ctk.CTkLabel(row_frame, text=self.arabic(reversed_name), **TABLE_ROW_STYLE).grid(row=0, column=2, padx=5, sticky="nsew")
 
-            # Action buttons (Place on the left)
+            # Display Academic Level (Term) (middle-left column)
+            ctk.CTkLabel(row_frame, text=self.arabic(student.get("term", "")),
+                         **TABLE_ROW_STYLE).grid(row=0, column=1, padx=5, sticky="nsew")
+
+            # Action buttons (Place on the far left column in RTL grid)
             actions_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
             actions_frame.grid(row=0, column=0, padx=5, sticky="w") # Action buttons on the left, aligned west
 
@@ -241,35 +295,41 @@ class SearchPage(ctk.CTkFrame):
             delete_button.pack(side="left", padx=2) # Pack to the left within actions_frame
 
     def display_teacher_results(self, teachers: List[Dict[str, Any]]):
-        """Display teacher search results with headers inside the scrollable frame."""
-        # Define headers for teacher results (order changed)
-        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"]
-        # Map header index to RTL grid column index (adjusted indices)
-        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3}
+        """Displays the teacher search results in a table format.
+        
+        Args:
+            teachers: A list of dictionaries, each representing a teacher record.
+        """
+        # Define headers for teacher results (order adjusted for RTL display)
+        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number
+        # Map logical header order to RTL grid column index (0 is leftmost, increases to the right)
+        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3} # Actions -> Col 0, Name -> Col 2, Term -> Col 1, Serial -> Col 3
 
         # Create header row frame inside the scrollable frame
         header_frame = ctk.CTkFrame(self.results_scroll_frame, fg_color="gray50") # Add a background color for header
-        # Place the header frame within the scrollable frame
+        # Place the header frame within the scrollable frame, spanning the full width
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 5))
 
-        # Configure columns for RTL (Action | Name | Term | Serial)
+        # Configure columns for RTL table layout within the header frame (Action | Term | Name | Serial)
         # Weights adjusted to distribute space more evenly among data columns
-        # These weights must match the weights in the row frames below
+        # These weights must match the weights in the data row frames below
         header_frame.grid_columnconfigure(0, weight=0) # Action buttons column (fixed width/minimal weight)
-        header_frame.grid_columnconfigure(1, weight=1) # Term
-        header_frame.grid_columnconfigure(2, weight=2) # Name (Name usually takes more space)
-        header_frame.grid_columnconfigure(3, weight=0) # Serial Number (fixed width/minimal weight)
+        header_frame.grid_columnconfigure(1, weight=1) # Term column (expands)
+        header_frame.grid_columnconfigure(2, weight=2) # Name column (expands more)
+        header_frame.grid_columnconfigure(3, weight=0) # Serial Number column (fixed width/minimal weight)
 
         # Place headers from right to left using the map
-        for i, header in enumerate(headers):
-            col_index = header_column_map_rtl[i]
-            ctk.CTkLabel(
-                header_frame,
-                text=self.arabic(header),
-                **TABLE_HEADER_STYLE
-            ).grid(row=0, column=col_index, padx=5, sticky="nsew") # Use nsew sticky for better alignment
+        display_headers_rtl_order = [headers[3], headers[2], headers[1], headers[0]] # Serial, Term, Name, Actions
+        display_columns_rtl_order = [3, 2, 1, 0] # Corresponding grid columns from right to left
 
-        # Start row index for data from 1 (after header row)
+        for i, header_text in enumerate(display_headers_rtl_order):
+             ctk.CTkLabel(
+                header_frame,
+                text=self.arabic(header_text),
+                **TABLE_HEADER_STYLE
+            ).grid(row=0, column=display_columns_rtl_order[i], padx=5, sticky="nsew") # Use nsew sticky for better alignment
+
+        # Display teacher data rows starting from row 1 (after header)
         for i, teacher in enumerate(teachers, start=1):
             row_frame = ctk.CTkFrame(self.results_scroll_frame)
             # Place the row frame within the scrollable frame, spanning the full width
@@ -277,27 +337,28 @@ class SearchPage(ctk.CTkFrame):
             self.results_scroll_frame.grid_rowconfigure(i, weight=1)
             row_frame.grid(row=i, column=0, sticky="ew", pady=2)
 
-            # Configure columns for RTL (Action | Name | Term | Serial)
+            # Configure columns for RTL table layout within the row frame (Action | Term | Name | Serial)
             # These weights must match the weights in the header frame
-            row_frame.grid_columnconfigure(0, weight=0) # Action buttons column (fixed width/minimal weight)
-            row_frame.grid_columnconfigure(1, weight=1) # Term
-            row_frame.grid_columnconfigure(2, weight=2) # Name (Name usually takes more space)
-            row_frame.grid_columnconfigure(3, weight=0) # Serial Number (fixed width/minimal weight)
+            row_frame.grid_columnconfigure(0, weight=0) # Action buttons column
+            row_frame.grid_columnconfigure(1, weight=1) # Term column
+            row_frame.grid_columnconfigure(2, weight=2) # Name column
+            row_frame.grid_columnconfigure(3, weight=0) # Serial Number column
 
-            # Teacher data (Place from right to left - Name, Term) + Serial (far right) + Actions (far left)
-            data_order = ["name", "term"]
-            # The order to display data fields corresponding to columns from left to right (Serial, Name, Term)
-            display_order = [3, 2, 1] # Adjusted column indices for Serial, Name, Term
-
-            # Display Serial Number
+            # Display Serial Number (far right column in RTL grid)
             ctk.CTkLabel(row_frame, text=str(i), **TABLE_ROW_STYLE).grid(row=0, column=3, padx=5, sticky="nsew")
 
-            # Display data fields (Name, Term)
-            # Adjusted placement for Name and Term based on new display_order
-            ctk.CTkLabel(row_frame, text=self.arabic(teacher.get("name", "")), **TABLE_ROW_STYLE).grid(row=0, column=2, padx=5, sticky="nsew")
-            ctk.CTkLabel(row_frame, text=self.arabic(teacher.get("term", "")), **TABLE_ROW_STYLE).grid(row=0, column=1, padx=5, sticky="nsew")
+            # Display Name (reversed for RTL display, placed in the middle-right column)
+            original_name = teacher.get("name", "")
+            name_parts = original_name.split()
+            reversed_name_parts = name_parts[::-1] # Reverse the list of parts
+            reversed_name = " ".join(reversed_name_parts) # Join parts with space
+            ctk.CTkLabel(row_frame, text=self.arabic(reversed_name), **TABLE_ROW_STYLE).grid(row=0, column=2, padx=5, sticky="nsew")
 
-            # Action buttons (Place on the left)
+            # Display Academic Level (Term) (middle-left column)
+            ctk.CTkLabel(row_frame, text=self.arabic(teacher.get("term", "")),
+                         **TABLE_ROW_STYLE).grid(row=0, column=1, padx=5, sticky="nsew")
+
+            # Action buttons (Place on the far left column in RTL grid)
             actions_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
             actions_frame.grid(row=0, column=0, padx=5, sticky="w") # Action buttons on the left, aligned west
 
@@ -340,45 +401,109 @@ class SearchPage(ctk.CTkFrame):
             salary_button.pack(side="left", padx=2) # Pack to the left within actions_frame
 
     def show_student_details(self, student: Dict[str, Any]):
-        """Show student details popup."""
-        StudentDetailsPopup(self.master, student, on_close=self.search) # Pass self.search as on_close callback
+        """Shows a popup window with detailed information for a student.
+        
+        Args:
+            student: A dictionary containing the student's data.
+        """
+        # Pass self.search as on_close callback to refresh results after closing popup
+        StudentDetailsPopup(self.master, student, on_close=self.search)
 
     def show_teacher_details(self, teacher: Dict[str, Any]):
-        """Show teacher details popup."""
+        """Shows a popup window with detailed information for a teacher.
+        
+        Args:
+            teacher: A dictionary containing the teacher's data.
+        """
         TeacherDetailsPopup(self.master, teacher, arabic_handler=self.arabic, on_close=self.search)
 
     def edit_student(self, student: Dict[str, Any]):
-        """Navigate to the student edit page."""
-        if self.master and hasattr(self.master, 'show_edit_student_page'):
-            self.master.show_edit_student_page(student, on_save=self.search, on_cancel=self.search)
+        """Navigates to the student edit page.
+        
+        Args:
+            student: A dictionary containing the student's data to be edited.
+        """
+        # Hide the current search page
+        self.grid_forget()
+        # Create and show the edit page, passing a callback to return here and refresh
+        edit_page = EditStudentPage(self.master, student, on_back=lambda: self._show_search_page_after_edit(edit_page))
+        edit_page.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        # Ensure the master grid is configured to allow the new page to expand
+        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
 
     def edit_teacher(self, teacher: Dict[str, Any]):
-        """Navigate to the teacher edit page."""
-        if self.master and hasattr(self.master, 'show_edit_teacher_page'):
-            self.master.show_edit_teacher_page(teacher, on_save=self.search, on_cancel=self.search)
+        """Navigates to the teacher edit page.
+        
+        Args:
+            teacher: A dictionary containing the teacher's data to be edited.
+        """
+        # Hide the current search page
+        self.grid_forget()
+        # Create and show the edit page, passing a callback to return here and refresh
+        edit_page = EditTeacherPage(self.master, teacher, on_back=lambda: self._show_search_page_after_edit(edit_page))
+        edit_page.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        # Ensure the master grid is configured to allow the new page to expand
+        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
+
+    def _show_search_page_after_edit(self, edit_page_instance):
+        """Destroys the edit page instance and returns to the search page.
+        
+        Refreshes the search results upon returning.
+        
+        Args:
+            edit_page_instance: The instance of the edit page to destroy.
+        """
+        if edit_page_instance:
+            edit_page_instance.destroy()
+        # Show the search page again by re-gridding it
+        self.grid(row=0, column=0, sticky="nsew", padx=20, pady=20) # Re-grid to its original position
+        # Refresh the search results to reflect any changes made in the edit page
+        self.search()
 
     def delete_student(self, student: Dict[str, Any]):
-        """Delete a student after confirmation."""
+        """Deletes a student record after user confirmation.
+        
+        Args:
+            student: A dictionary containing the student's data to be deleted.
+        """
+        # Show confirmation dialog in Arabic
         if messagebox.askyesno(self.arabic("تأكيد الحذف"), self.arabic(f"هل أنت متأكد من حذف الطالب {student.get('name', '')}؟")):
+            # Call backend function to delete student by name
             delete_student_by_name(student.get('name', ''))
-            self.search() # Refresh results after deletion
+            # Refresh search results after deletion
+            self.search()
 
     def delete_teacher(self, teacher: Dict[str, Any]):
-        """Delete a teacher after confirmation."""
+        """Deletes a teacher record after user confirmation.
+        
+        Args:
+            teacher: A dictionary containing the teacher's data to be deleted.
+        """
+        # Show confirmation dialog in Arabic
         if messagebox.askyesno(self.arabic("تأكيد الحذف"), self.arabic(f"هل أنت متأكد من حذف المعلمة {teacher.get('name', '')}؟")):
             # Assuming teacher has an 'id' field for deletion
             teacher_id = teacher.get('id') # Replace 'id' with the actual field name if different
             if teacher_id:
+                # Call backend function to delete teacher by ID
                 delete_teacher_by_id(teacher_id)
-                self.search() # Refresh results after deletion
+                # Refresh search results after deletion
+                self.search()
             else:
-                messagebox.showerror(self.arabic("خطأ"), self.arabic("لا يمكن حذف المعلمة: معرف المعلمة غير موجود."))
+                # Show error message if teacher ID is missing
+                messagebox.showerror(self.arabic("خطأ"), self.arabic("لا يمكن حذف المعلمة: معرف المعلمة غير موجود.")) # "Error", "Cannot delete teacher: Teacher ID not found."
 
     def show_teacher_salary(self, teacher: Dict[str, Any]):
-        """Show teacher salary details popup."""
-        TeacherSalaryPopup(self.master, teacher, arabic_handler=self.arabic) # Pass self.arabic for Arabic handling
+        """Shows a popup window with salary details for a teacher.
+        
+        Args:
+            teacher: A dictionary containing the teacher's data.
+        """
+        # Pass self.arabic for Arabic handling in the popup and the teacher data
+        TeacherSalaryPopup(self.master, teacher, arabic_handler=self.arabic)
 
     def go_back(self):
-        """Navigate back to the previous page."""
+        """Navigates back to the previous page using the provided callback."""
         if self.on_back:
             self.on_back()

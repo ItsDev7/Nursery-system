@@ -1,34 +1,93 @@
+"""
+Statistics and Reports module for Elnada Kindergarten Management System.
+This module handles the display of various statistics and reports including:
+- Financial summary
+- Teacher statistics
+- Student statistics by term
+"""
+
+# Standard library imports
+from tkinter import messagebox
+
+# Third-party imports
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkScrollableFrame
-from tkinter import Canvas, messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.font_manager as fm
 import numpy as np
+
+# Local application imports
 from backend.database import get_detailed_statistics
 
 class StatisticsPage:
+    """
+    Handles the statistics and reports page of the application.
+    
+    This class manages the display of various statistics including:
+    - Financial summary (income, expenses, remaining balance)
+    - Teacher statistics (count, salaries)
+    - Student statistics by term (count, fees)
+    """
+
     def __init__(self, main_window, on_back=None):
+        """
+        Initialize the statistics page.
+
+        Args:
+            main_window: The main application window
+            on_back: Callback function to handle back navigation
+        """
         self.main = main_window
         self.on_back = on_back
         self.setup_ui()
 
     def arabic(self, text: str) -> str:
+        """
+        Format Arabic text for proper display.
+
+        Args:
+            text (str): The Arabic text to be displayed
+
+        Returns:
+            str: Properly formatted Arabic text
+        """
         import arabic_reshaper
         from bidi.algorithm import get_display
         reshaped = arabic_reshaper.reshape(text)
         return get_display(reshaped)
 
     def setup_ui(self):
+        """Set up the statistics page user interface."""
+        self._clear_main_window()
+        self._create_main_frame()
+        self._create_header()
+        self._load_and_display_statistics()
+
+    def _clear_main_window(self):
+        """Clear all existing widgets from the main window."""
         for widget in self.main.winfo_children():
             widget.destroy()
 
-        # إطار رئيسي
+    def _create_main_frame(self):
+        """Create and configure the main frame with grid layout."""
+        # Create main frame
         self.main_frame = CTkFrame(self.main)
         self.main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        
+        # Configure main window grid
         self.main.grid_rowconfigure(0, weight=1)
         self.main.grid_columnconfigure(0, weight=1)
 
-        # زر الرجوع
+        # Configure main frame grid
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.main_frame.grid_rowconfigure(0, weight=0)  # Header row
+        self.main_frame.grid_rowconfigure(1, weight=0)  # Summary row
+        self.main_frame.grid_rowconfigure(2, weight=0)  # Teachers stats row
+        self.main_frame.grid_rowconfigure(3, weight=1)  # Students stats row
+
+    def _create_header(self):
+        """Create the page header with back button and title."""
+        # Back button
         back_button = CTkButton(
             self.main_frame,
             text="←",
@@ -43,7 +102,7 @@ class StatisticsPage:
         )
         back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
-        # العنوان
+        # Page title
         title = CTkLabel(
             self.main_frame,
             text=self.arabic("الإحصائيات والتقارير"),
@@ -52,23 +111,34 @@ class StatisticsPage:
         )
         title.grid(row=0, column=1, pady=(10, 20), sticky="n")
 
-        # الحصول على البيانات
+    def _load_and_display_statistics(self):
+        """Load statistics data and display it in the UI."""
         try:
             self.stats = get_detailed_statistics()
             self.display_statistics()
         except Exception as e:
-            messagebox.showerror("خطأ", f"حدث خطأ أثناء جلب البيانات: {str(e)}")
+            messagebox.showerror(
+                "خطأ",
+                f"حدث خطأ أثناء جلب البيانات: {str(e)}"
+            )
 
     def display_statistics(self):
-        # إنشاء إطار للملخص العام (placed directly in main_frame)
+        """Display all statistics sections."""
+        self._create_summary_section()
+        self._create_teachers_section()
+        self._create_students_section()
+
+    def _create_summary_section(self):
+        """Create and display the financial summary section."""
+        # Create summary frame
         summary_frame = CTkFrame(self.main_frame)
-        summary_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=20, pady=10) # Adjusted row
+        summary_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=20, pady=10)
         
-        # تكوين الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        summary_frame.grid_columnconfigure(0, weight=1)  # عمود العنوان
-        summary_frame.grid_columnconfigure(1, weight=1)  # عمود القيمة
+        # Configure grid for RTL layout
+        summary_frame.grid_columnconfigure(0, weight=1)  # Value column
+        summary_frame.grid_columnconfigure(1, weight=1)  # Label column
         
-        # عنوان الملخص العام
+        # Section title
         summary_title = CTkLabel(
             summary_frame,
             text=self.arabic("الملخص العام"),
@@ -78,7 +148,7 @@ class StatisticsPage:
         )
         summary_title.grid(row=0, column=0, columnspan=2, pady=10, padx=10, sticky="e")
         
-        # بيانات الملخص العام
+        # Display summary data
         summary = self.stats["summary"]
         summary_data = [
             ("إجمالي الإيرادات", f"{summary['income']:.2f}"),
@@ -87,37 +157,19 @@ class StatisticsPage:
             ("إجمالي رواتب المعلمات", f"{summary['teacher_salaries']:.2f}")
         ]
         
-        # إعادة ترتيب الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        for i, (label, value) in enumerate(summary_data):
-            # عمود التسمية مع النقطتين
-            CTkLabel(
-                summary_frame,
-                text=self.arabic(f"{label}:"),
-                font=("Arial", 18, "bold"),
-                anchor="e",
-                justify="right",
-                text_color="#2D8CFF"
-            ).grid(row=i+1, column=1, padx=10, pady=8, sticky="e")
-            
-            # عمود القيمة
-            CTkLabel(
-                summary_frame,
-                text=self.arabic(value),
-                font=("Arial", 20),
-                anchor="w",
-                justify="left",
-                text_color="#333333"
-            ).grid(row=i+1, column=0, padx=10, pady=8, sticky="w")
-        
-        # إنشاء إطار لإحصائيات المعلمات (placed directly in main_frame)
+        self._display_data_grid(summary_frame, summary_data, "#2D8CFF", 1)
+
+    def _create_teachers_section(self):
+        """Create and display the teachers statistics section."""
+        # Create teachers frame
         teachers_frame = CTkFrame(self.main_frame)
-        teachers_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=20, pady=10) # Adjusted row
+        teachers_frame.grid(row=2, column=0, columnspan=2, sticky="ew", padx=20, pady=10)
         
-        # تكوين الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        teachers_frame.grid_columnconfigure(0, weight=1)  # عمود العنوان
-        teachers_frame.grid_columnconfigure(1, weight=1)  # عمود القيمة
+        # Configure grid for RTL layout
+        teachers_frame.grid_columnconfigure(0, weight=1)  # Value column
+        teachers_frame.grid_columnconfigure(1, weight=1)  # Label column
         
-        # عنوان إحصائيات المعلمات
+        # Section title
         teachers_title = CTkLabel(
             teachers_frame,
             text=self.arabic("إحصائيات المعلمات"),
@@ -127,43 +179,27 @@ class StatisticsPage:
         )
         teachers_title.grid(row=0, column=0, columnspan=2, pady=10, padx=10, sticky="e")
         
-        # بيانات المعلمات
+        # Display teachers data
         teachers = self.stats["teachers"]
         teachers_data = [
             ("عدد المعلمات", f"{teachers['teacher_count']}"),
             ("إجمالي الرواتب", f"{teachers['total_salaries']:.2f}")
         ]
         
-        # إعادة ترتيب الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        for i, (label, value) in enumerate(teachers_data):
-            CTkLabel(
-                teachers_frame,
-                text=self.arabic(f"{label}:"),
-                font=("Arial", 18, "bold"),
-                anchor="e",
-                justify="right",
-                text_color="#E91E63"
-            ).grid(row=i+1, column=1, padx=10, pady=8, sticky="e")
-            
-            CTkLabel(
-                teachers_frame,
-                text=self.arabic(value),
-                font=("Arial", 20),
-                anchor="w",
-                justify="left",
-                text_color="#333333"
-            ).grid(row=i+1, column=0, padx=10, pady=8, sticky="w")
-        
-        # إنشاء إطار لإحصائيات الطلاب حسب الفصل (placed directly in main_frame)
+        self._display_data_grid(teachers_frame, teachers_data, "#E91E63", 1)
+
+    def _create_students_section(self):
+        """Create and display the students statistics section."""
+        # Create students frame
         students_frame = CTkFrame(self.main_frame)
-        students_frame.grid(row=3, column=0, columnspan=2, sticky="ew", padx=20, pady=10) # Adjusted row
+        students_frame.grid(row=3, column=0, columnspan=2, sticky="ew", padx=20, pady=10)
         
-        # تكوين الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        students_frame.grid_columnconfigure(0, weight=1)  # عمود الفصل
-        students_frame.grid_columnconfigure(1, weight=1)  # عمود عدد الطلاب
-        students_frame.grid_columnconfigure(2, weight=1)  # عمود إجمالي الرسوم
+        # Configure grid for RTL layout
+        students_frame.grid_columnconfigure(0, weight=1)  # Fees column
+        students_frame.grid_columnconfigure(1, weight=1)  # Count column
+        students_frame.grid_columnconfigure(2, weight=1)  # Term column
         
-        # عنوان إحصائيات الطلاب
+        # Section title
         students_title = CTkLabel(
             students_frame,
             text=self.arabic("إحصائيات الطلاب حسب الفصل"),
@@ -173,38 +209,21 @@ class StatisticsPage:
         )
         students_title.grid(row=0, column=0, columnspan=3, pady=10, padx=10, sticky="e")
         
-        # إعادة ترتيب الأعمدة لتناسب اللغة العربية (من اليمين لليسار)
-        # عناوين الأعمدة
-        CTkLabel(
-            students_frame,
-            text=self.arabic("الفصل:"),
-            font=("Arial", 18, "bold"),
-            justify="right",
-            text_color="#4CAF50"
-        ).grid(row=1, column=2, padx=10, pady=8, sticky="e")
+        # Column headers
+        headers = ["إجمالي الرسوم:", "عدد الطلاب:", "الفصل:"]
+        for col, header in enumerate(headers):
+            CTkLabel(
+                students_frame,
+                text=self.arabic(header),
+                font=("Arial", 18, "bold"),
+                justify="right",
+                text_color="#4CAF50"
+            ).grid(row=1, column=col, padx=10, pady=8, sticky="e")
         
-        CTkLabel(
-            students_frame,
-            text=self.arabic("عدد الطلاب:"),
-            font=("Arial", 18, "bold"),
-            justify="right",
-            text_color="#4CAF50"
-        ).grid(row=1, column=1, padx=10, pady=8, sticky="e")
-        
-        CTkLabel(
-            students_frame,
-            text=self.arabic("إجمالي الرسوم:"),
-            font=("Arial", 18, "bold"),
-            justify="right",
-            text_color="#4CAF50"
-        ).grid(row=1, column=0, padx=10, pady=8, sticky="e")
-        
-        # بيانات الطلاب حسب الفصل
+        # Display students data
         students_by_term = self.stats["students_by_term"]
-        row_idx = 2
-        
-        for term, data in students_by_term.items():
-            # اسم الفصل (يظهر على اليمين)
+        for row_idx, (term, data) in enumerate(students_by_term.items(), start=2):
+            # Term name
             CTkLabel(
                 students_frame,
                 text=self.arabic(term),
@@ -213,6 +232,7 @@ class StatisticsPage:
                 text_color="#333333"
             ).grid(row=row_idx, column=2, padx=10, pady=8, sticky="e")
             
+            # Student count
             CTkLabel(
                 students_frame,
                 text=str(data["student_count"]),
@@ -221,6 +241,7 @@ class StatisticsPage:
                 text_color="#333333"
             ).grid(row=row_idx, column=1, padx=10, pady=8, sticky="e")
             
+            # Total fees
             CTkLabel(
                 students_frame,
                 text=f"{data['total_fees']:.2f}",
@@ -228,119 +249,46 @@ class StatisticsPage:
                 justify="right",
                 text_color="#333333"
             ).grid(row=row_idx, column=0, padx=10, pady=8, sticky="e")
+
+    def _display_data_grid(self, parent, data, color, start_row):
+        """
+        Display a grid of data with labels and values.
+
+        Args:
+            parent: Parent widget
+            data: List of (label, value) tuples
+            color: Color for labels
+            start_row: Starting row index
+        """
+        for i, (label, value) in enumerate(data):
+            # Label
+            CTkLabel(
+                parent,
+                text=self.arabic(f"{label}:"),
+                font=("Arial", 18, "bold"),
+                anchor="e",
+                justify="right",
+                text_color=color
+            ).grid(row=i+start_row, column=1, padx=10, pady=8, sticky="e")
             
-            row_idx += 1
-        
-        # إنشاء الرسوم البيانية (placed directly in main_frame)
-        charts_frame = CTkFrame(self.main_frame)
-        charts_frame.grid(row=4, column=0, columnspan=2, sticky="ew", padx=20, pady=10) # Adjusted row
-
-        self.create_charts(charts_frame) # Pass the new charts_frame
-
-    def create_charts(self, parent_frame):
-        # عنوان الرسوم البيانية
-        charts_title = CTkLabel(
-            parent_frame,
-            text=self.arabic("الرسوم البيانية"),
-            font=("Arial", 24, "bold"),
-            text_color="#9C27B0",
-            justify="right"
-        )
-        charts_title.grid(row=0, column=0, pady=10, padx=10, sticky="e")
-        
-        # رسم بياني للإيرادات حسب الفصل
-        self.create_term_fees_chart(parent_frame)
-        
-        # رسم بياني للإيرادات والمصروفات
-        self.create_income_expense_chart(parent_frame)
-
-    def create_term_fees_chart(self, parent_frame):
-        # إعداد البيانات
-        students_by_term = self.stats["students_by_term"]
-        terms = list(students_by_term.keys())
-        # تحويل أسماء الفصول إلى نصوص عربية صحيحة
-        arabic_terms = [self.arabic(term) for term in terms]
-        fees = [students_by_term[term]["total_fees"] for term in terms]
-        students = [students_by_term[term]["student_count"] for term in terms]
-        
-        # إنشاء الرسم البياني
-        fig, ax1 = plt.subplots(figsize=(8, 4), dpi=100)
-        
-        # تعيين الخط العربي
-        plt.rcParams['font.family'] = 'Arial'
-        
-        # رسم أعمدة الرسوم
-        bars = ax1.bar(arabic_terms, fees, color='#4CAF50', alpha=0.7)
-        ax1.set_ylabel(self.arabic('الرسوم'), color='#4CAF50', fontsize=12)
-        ax1.tick_params(axis='y', labelcolor='#4CAF50')
-        ax1.set_title(self.arabic('الرسوم وعدد الطلاب حسب الفصل'), fontsize=16)
-        
-        # إضافة محور ثانوي لعدد الطلاب
-        ax2 = ax1.twinx()
-        # إصلاح الخطأ بإزالة تحديد اللون المكرر
-        line = ax2.plot(arabic_terms, students, marker='o', linewidth=2, markersize=8, color='#E91E63')
-        ax2.set_ylabel(self.arabic('عدد الطلاب'), color='#E91E63', fontsize=12)
-        ax2.tick_params(axis='y', labelcolor='#E91E63')
-        
-        # تدوير أسماء الفصول لتكون أكثر وضوحًا
-        plt.xticks(rotation=45, ha='right')
-        
-        # إضافة قيم فوق الأعمدة
-        for bar, student in zip(bars, students):
-            height = bar.get_height()
-            ax1.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                    f'{height:.0f}', ha='center', va='bottom', fontsize=8)
-            
-        fig.tight_layout()
-        
-        # إضافة الرسم البياني إلى الواجهة
-        canvas = FigureCanvasTkAgg(fig, master=parent_frame)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-
-    def create_income_expense_chart(self, parent_frame):
-        # إعداد البيانات
-        summary = self.stats["summary"]
-        labels = ['الإيرادات', 'المصروفات', 'رواتب المعلمات']
-        # تحويل التسميات إلى نصوص عربية صحيحة
-        arabic_labels = [self.arabic(label) for label in labels]
-        values = [summary['income'], summary['expenses'], summary['teacher_salaries']]
-        colors = ['#4CAF50', '#F44336', '#E91E63']
-        
-        # إنشاء الرسم البياني
-        fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
-        
-        # رسم الأعمدة
-        bars = ax.bar(arabic_labels, values, color=colors, alpha=0.7)
-        
-        # إضافة العنوان والمحاور
-        ax.set_title(self.arabic('مقارنة الإيرادات والمصروفات'), fontsize=16)
-        ax.set_ylabel(self.arabic('القيمة'), fontsize=12)
-        
-        # إضافة قيم فوق الأعمدة
-        for bar in bars:
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                   f'{height:.0f}', ha='center', va='bottom', fontsize=10)
-        
-        fig.tight_layout()
-        
-        # إضافة الرسم البياني إلى الواجهة
-        canvas = FigureCanvasTkAgg(fig, master=parent_frame)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+            # Value
+            CTkLabel(
+                parent,
+                text=self.arabic(value),
+                font=("Arial", 20),
+                anchor="w",
+                justify="left",
+                text_color="#333333"
+            ).grid(row=i+start_row, column=0, padx=10, pady=8, sticky="w")
 
     def go_back(self):
-        # تنظيف الرسوم البيانية قبل الإغلاق لتجنب أخطاء التحديث
-        plt.close('all')
-        
+        """Handle navigation back to the previous page."""
         try:
-            # محاولة تنظيف الواجهة بشكل آمن
             for widget in self.main.winfo_children():
                 widget.destroy()
-                
+
             if self.on_back:
                 self.on_back()
-        except Exception as e:
-            # تجاهل أخطاء التحديث عند إغلاق التطبيق
+        except Exception:
+            # Ignore cleanup errors when closing the application
             pass

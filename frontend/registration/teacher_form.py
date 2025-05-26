@@ -38,7 +38,8 @@ class TeacherRegistrationForm:
             widget.destroy()
             
         # Main frame
-        self.frame = ctk.CTkFrame(self.master)
+        # Set frame color to match the master window's background color
+        self.frame = ctk.CTkFrame(self.master, fg_color=self.master.cget('fg_color'))
         self.frame.grid(row=0, column=0, sticky="nsew", padx=80, pady=40)
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)

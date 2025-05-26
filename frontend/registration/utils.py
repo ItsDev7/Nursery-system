@@ -18,7 +18,7 @@ def validate_required_fields(name: str, nid: str, phone1: str, phone2: str) -> b
         bool: True if validation passes, False otherwise
     """
     if not name or not nid or (not phone1 and not phone2):
-        messagebox.showerror("Error", "الاسم والرقم القومي ورقم هاتف واحد على الأقل مطلوب")
+        messagebox.showerror("خطأ", "الاسم والرقم القومي ورقم هاتف واحد على الأقل مطلوب")
         return False
     return True
 

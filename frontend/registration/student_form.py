@@ -44,7 +44,8 @@ class StudentRegistrationForm:
             widget.destroy()
             
         # Main frame
-        self.frame = ctk.CTkFrame(self.master)
+        # Set frame color to match the master window's background color
+        self.frame = ctk.CTkFrame(self.master, fg_color=self.master.cget('fg_color'))
         self.frame.grid(row=0, column=0, sticky="nsew", padx=80, pady=40)
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
@@ -248,6 +249,15 @@ class StudentRegistrationForm:
         
         if not validate_required_fields(name, nid, phone1, phone2):
             return
+            
+        # Validate fee amounts are numbers
+        for fee in fees:
+            if fee:
+                try:
+                    float(fee)
+                except ValueError:
+                    messagebox.showerror("خطأ", "يجب أن تكون جميع مبالغ الرسوم أرقامًا صحيحة.", parent=self.master)
+                    return
             
         add_student(name, nid, term, gender, phone1, phone2, fees, fee_dates)
         messagebox.showinfo("نجاح", "تم تسجيل الطالب بنجاح")
