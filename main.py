@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 from frontend.login import Login
 from backend.init_db import init_database
-import time # Keep time import as it's used in on_window_resize
 
 class Main:
     """Main application class responsible for setting up the main window and managing the application flow."""

@@ -10,12 +10,7 @@ This module handles the display of various statistics and reports including:
 from tkinter import messagebox
 
 # Third-party imports
-from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkScrollableFrame
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import matplotlib.font_manager as fm
-import numpy as np
-
+from customtkinter import CTkFrame, CTkLabel, CTkButton
 # Local application imports
 from backend.database import get_detailed_statistics
 

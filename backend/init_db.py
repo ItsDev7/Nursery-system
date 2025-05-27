@@ -1,4 +1,4 @@
-import sqlite3
+
 # Import necessary table creation functions from the database module
 from .database import (
     create_students_table,
