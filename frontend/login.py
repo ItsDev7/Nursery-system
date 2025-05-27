@@ -30,6 +30,30 @@ class Login:
         """
         self.main = main_window
         self.setup_ui()
+        self._bind_enter_key()
+
+    def _bind_enter_key(self):
+        """Bind Enter key to appropriate actions."""
+        # Bind Enter key to container for global login trigger
+        self.container.bind('<Return>', self._handle_enter)
+        
+        # Bind Enter key to username field to move to password
+        self.username_entry.bind('<Return>', self._handle_username_enter)
+        
+        # Bind Enter key to password field to trigger login
+        self.password_entry.bind('<Return>', self._handle_password_enter)
+
+    def _handle_enter(self, event):
+        """Handle Enter key press in the container."""
+        self.login_clicked()
+
+    def _handle_username_enter(self, event):
+        """Handle Enter key press in username field."""
+        self.password_entry.focus()
+
+    def _handle_password_enter(self, event):
+        """Handle Enter key press in password field."""
+        self.login_clicked()
 
     def arabic(self, text: str) -> str:
         """

@@ -27,6 +27,7 @@ from backend.database import (
     get_all_activities, add_activity,
     update_activity, delete_activity, get_summary
 )
+from .settings import SettingsPage
 
 class NextPage:
     """
@@ -93,6 +94,12 @@ class NextPage:
         self.clear_content_frame()
         self.current_page = StatisticsPage(self.content_frame, on_back=self.show_dashboard)
         self.highlight_active_nav_button("statistics")
+
+    def open_settings_page(self):
+        """Open the settings page."""
+        self.clear_content_frame()
+        self.current_page = SettingsPage(self.content_frame, self.main, on_back=self.show_dashboard)
+        self.highlight_active_nav_button("settings")
 
     # UI Helper Methods
     def clear_content_frame(self):
@@ -514,7 +521,10 @@ class NextPage:
         # Configure sidebar grid
         for i in range(7):
             sidebar.grid_rowconfigure(i, weight=0)
+        # Configure row 7 to take up available space, pushing subsequent rows down
         sidebar.grid_rowconfigure(7, weight=1)
+        # Configure row 8 for the settings button, give it weight 0 so it stays at the bottom
+        sidebar.grid_rowconfigure(8, weight=0)
         sidebar.grid_columnconfigure(0, weight=1)
         
         # Logo
@@ -574,6 +584,13 @@ class NextPage:
             parent, 6,
             self.arabic("الإحصائيات والتقارير"),
             self.open_statistics_page
+        )
+        
+        # Settings button
+        self.nav_buttons["settings"] = self._create_nav_button(
+            parent, 8, # Changed row to 8
+            self.arabic("الإعدادات"),
+            self.open_settings_page
         )
 
     def _create_nav_button(self, parent, row, text, command, active_color="#3489f1"):

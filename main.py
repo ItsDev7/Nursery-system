@@ -165,5 +165,3 @@ if __name__ == "__main__":
     app = Main()
     app.run()    
 
-# To run the program in resolution testing mode, use:
-# python main.py --test-resolution
