@@ -162,7 +162,6 @@ Here are some screenshots illustrating the application's user interface:
 
 ![Settings Page Screenshot](images/settings_page.png)
 
-_Note: Please replace the example image paths (`images/...`) with the actual paths to your screenshot files within the repository._
 
 ## Technologies Used
 
