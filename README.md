@@ -29,7 +29,7 @@ Follow these instructions to set up and run the project locally.
 1.  **Clone the repository:**
 
     ```bash
-    git clone <repository_url>
+    git clone <https://github.com/ItsDev7/EL-NADA-Nursery.git>
     cd Elnada_project
     ```
 
@@ -66,6 +66,13 @@ After installing the dependencies, you can run the application directly:
 ```bash
 python main.py
 ```
+
+## Default Login Credentials
+
+For initial access to the application, use the following default credentials:
+
+- **Username:** `admin`
+- **Password:** `admin123`
 
 ## Building the Executable (.exe)
 
@@ -130,6 +137,20 @@ Tips for Development (regarding responsiveness):
 - Utilize `grid_rowconfigure` and `grid_columnconfigure` with `weight=1` for expandable rows/columns.
 - Prefer relative sizing over fixed pixel sizes where possible.
 
+## Download Executable
+
+You can download the latest Windows executable (`.exe`) of the EL-NADA Nursery Management System directly from the GitHub Releases page.
+
+1.  Go to the [Releases page](https://github.com/ItsDev7/EL-NADA-Nursery/releases) of this repository.
+2.  Look for the latest release.
+3.  Under the 'Assets' section of the release, you will find the `ELNADA.exe` file.
+4.  Click on the `ELNADA.exe` file to download it.
+
+Alternatively, you can add a direct download link here after creating a release:
+
+[Download ELNADA.exe (Direct Link)](https://www.mediafire.com/file/e96qfgpstwk42j1/ELNADA.exe/file)
+
+
 ## Screenshots
 
 Here are some screenshots illustrating the application's user interface:
@@ -161,7 +182,6 @@ Here are some screenshots illustrating the application's user interface:
 ### Settings Page
 
 ![Settings Page Screenshot](images/settings_page.png)
-
 
 ## Technologies Used
 
