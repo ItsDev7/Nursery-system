@@ -130,6 +130,40 @@ Tips for Development (regarding responsiveness):
 - Utilize `grid_rowconfigure` and `grid_columnconfigure` with `weight=1` for expandable rows/columns.
 - Prefer relative sizing over fixed pixel sizes where possible.
 
+## Screenshots
+
+Here are some screenshots illustrating the application's user interface:
+
+### Dashboard
+
+![Dashboard Screenshot](images/dashboard.png)
+
+### Student Registration Page
+
+![Student Registration Page Screenshot](images/student_registration.png)
+
+### Teacher Registration Page
+
+![Teacher Registration Page Screenshot](images/teacher_registration.png)
+
+### Search Page
+
+![Search Page Screenshot](images/search_page.png)
+
+### Fees and Income/Expenses Page
+
+![Fees and Income/Expenses Page Screenshot](images/fees_income_expenses.png)
+
+### Statistics and Reports Page
+
+![Statistics and Reports Page Screenshot](images/statistics_reports.png)
+
+### Settings Page
+
+![Settings Page Screenshot](images/settings_page.png)
+
+_Note: Please replace the example image paths (`images/...`) with the actual paths to your screenshot files within the repository._
+
 ## Technologies Used
 
 - Python
