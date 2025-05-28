@@ -13,6 +13,7 @@ a = Analysis(
         ('backend', 'backend'),
         ('frontend', 'frontend'),
         ('venv/Lib/site-packages/googleapiclient/discovery_cache/documents', 'googleapiclient/discovery_cache/documents'),
+        ('credentials.json', '.'),
     ],
     hiddenimports=[
         'customtkinter',

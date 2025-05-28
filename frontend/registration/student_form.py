@@ -67,7 +67,7 @@ class StudentRegistrationForm:
         # Student name
         ctk.CTkLabel(
             self.frame,
-            text=":اسم الطالب",
+            text=":اسم الطالب*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -83,7 +83,7 @@ class StudentRegistrationForm:
         # National ID
         ctk.CTkLabel(
             self.frame,
-            text=":الرقم القومي",
+            text=":الرقم القومي*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -132,7 +132,7 @@ class StudentRegistrationForm:
         # Primary guardian phone
         ctk.CTkLabel(
             self.frame,
-            text=":هاتف ولي الأمر",
+            text=":هاتف ولي الأمر*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -148,17 +148,17 @@ class StudentRegistrationForm:
         # Secondary guardian phone
         ctk.CTkLabel(
             self.frame,
-            text=":هاتف ولي أمر آخر*",
+            text=":هاتف ولي أمر آخر",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
         
         self.phone2_entry = ctk.CTkEntry(
             self.frame,
-            placeholder_text="أدخل رقم الهاتف اخر ان وجد*",
+            placeholder_text="أدخل رقم الهاتف اخر ان وجد",
             **ENTRY_STYLE
         )
-        self.phone2_entry.grid(row=row, column=0, columnspan=2, pady=5, sticky="ew")
+        self.phone2_entry.grid(row=row, column=0, columnspan=2, pady=(5, 15), sticky="ew")
         row += 1
         
         # Fees section
@@ -166,7 +166,7 @@ class StudentRegistrationForm:
             self.frame,
             text=":الرسوم",
             **LABEL_STYLE
-        ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
+        ).grid(row=row, column=1, sticky="e", pady=(15, 2), padx=(0, 10))
         row += 1
         
         self.setup_fees_section(row)
@@ -234,7 +234,7 @@ class StudentRegistrationForm:
             command=self.register_student,
             **REGISTER_BUTTON_STYLE
         )
-        self.register_button.grid(row=row, column=0, columnspan=2, pady=(20, 10), sticky="ew")
+        self.register_button.grid(row=row, column=0, columnspan=2, pady=(30, 10), sticky="ew")
         
     def register_student(self):
         """Handle student registration."""

@@ -109,16 +109,21 @@ class NextPage:
     
     def highlight_active_nav_button(self, active_button_id):
         """
-        Highlight the active navigation button.
+        Highlight the active navigation button (frame).
         
         Args:
             active_button_id (str): ID of the active navigation button
         """
-        for button_id, button in self.nav_buttons.items():
-            if button_id == active_button_id:
-                button.configure(fg_color="#3489f1")  # Active color
-            else:
-                button.configure(fg_color="#4A90E2")  # Default color
+        # Reset all buttons to default color
+        for button_id, button_frame in self.nav_buttons.items():
+             # Re-apply default color to the frame
+             button_frame.configure(fg_color="#4A90E2")
+
+        # Highlight the active button
+        if active_button_id in self.nav_buttons:
+            active_frame = self.nav_buttons[active_button_id]
+            # Apply active color to the frame
+            active_frame.configure(fg_color="#3489f1") # Active color
 
     # Dashboard Methods
     def show_dashboard(self):
@@ -514,7 +519,7 @@ class NextPage:
 
     def _create_sidebar(self, parent):
         """Create the navigation sidebar."""
-        sidebar = CTkFrame(parent, fg_color="#4A90E2", corner_radius=0, width=150)
+        sidebar = CTkFrame(parent, fg_color="#4A90E2", corner_radius=0, width=180)
         sidebar.grid(row=0, column=1, sticky="nsew")
         sidebar.grid_propagate(False)
         
@@ -530,7 +535,7 @@ class NextPage:
         # Logo
         logo_label = CTkLabel(
             sidebar,
-            text=self.arabic("حضانة الندى"),
+            text=self.arabic("      حضانة الندى"),
             font=("Arial Black", 20),
             text_color="white"
         )
@@ -548,66 +553,132 @@ class NextPage:
             parent, 1,
             self.arabic("لوحة المعلومات"),
             self.show_dashboard,
-            "#3489f1"
+            icon="🏠", # Home icon
+            active_color="#3489f1"
         )
         
         # Register student button
         self.nav_buttons["register_student"] = self._create_nav_button(
             parent, 2,
             self.arabic("تسجيل طالب جديد"),
-            self.open_register_student_page
+            self.open_register_student_page,
+            icon="➕👨‍🎓" # Add student icon
         )
         
         # Register teacher button
         self.nav_buttons["register_teacher"] = self._create_nav_button(
             parent, 3,
             self.arabic("تسجيل معلمة جديدة"),
-            self.open_register_teacher_page
+            self.open_register_teacher_page,
+            icon="➕👩‍🏫" # Add teacher icon
         )
         
         # Search button
         self.nav_buttons["search"] = self._create_nav_button(
             parent, 4,
             self.arabic("البحث عن طالب / معلمة"),
-            self.open_search_student_page
+            self.open_search_student_page,
+            icon="🔍" # Search icon
         )
         
         # Fees button
         self.nav_buttons["fees"] = self._create_nav_button(
             parent, 5,
             self.arabic("المصروفات والإيرادات"),
-            self.open_fees_page
+            self.open_fees_page,
+            icon="💸" # Money icon
         )
         
         # Statistics button
         self.nav_buttons["statistics"] = self._create_nav_button(
             parent, 6,
             self.arabic("الإحصائيات والتقارير"),
-            self.open_statistics_page
+            self.open_statistics_page,
+            icon="📈" # Chart icon
         )
         
         # Settings button
         self.nav_buttons["settings"] = self._create_nav_button(
             parent, 8, # Changed row to 8
             self.arabic("الإعدادات"),
-            self.open_settings_page
+            self.open_settings_page,
+            icon="⚙️" # Settings icon
         )
 
-    def _create_nav_button(self, parent, row, text, command, active_color="#3489f1"):
-        """Create a navigation button with specified properties."""
-        button = CTkButton(
+    def _create_nav_button(self, parent, row, text, command, icon=None, active_color="#3489f1"):
+        """Create a navigation button with specified properties, optional icon, and separate text/icon colors."""
+
+        # Simulate hover effect - Define functions first
+        def on_enter(event):
+            button_frame.configure(fg_color=active_color)
+
+        def on_leave(event):
+            # This function is simplified. The active state highlighting is handled
+            # by the highlight_active_nav_button method.
+            # For simplicity, we reset to default color unless the button is the currently active one.
+            # A more robust check for active state here would require passing the active_button_id
+            # or storing the button's ID/state in the frame itself.
+            # For now, rely on highlight_active_nav_button to set the correct color.
+            button_frame.configure(fg_color="#4A90E2")
+
+        # Create a frame to hold the icon and text labels
+        button_frame = CTkFrame(
             parent,
-            text=text,
-            font=("Arial", 14, "bold"),
-            fg_color="#4A90E2",
-            hover_color=active_color,
-            corner_radius=0,
-            anchor="e",
+            fg_color="#4A90E2", # Default background color
             height=40,
-            command=command
+            corner_radius=0
         )
-        button.grid(row=row, column=0, padx=10, sticky="ew")
-        return button
+        button_frame.grid(row=row, column=0, padx=10, pady=5, sticky="ew") # Add vertical padding
+        button_frame.grid_columnconfigure(0, weight=1) # Allow content to expand
+
+        # Bind click events to the frame and its children to trigger the command
+        def on_click(event=None):
+            command()
+
+        button_frame.bind("<Button-1>", on_click)
+
+        # Create a frame inside for the icon and text to handle RTL layout
+        content_frame = CTkFrame(button_frame, fg_color="transparent")
+        content_frame.pack(fill="both", expand=True, padx=10)
+        content_frame.grid_columnconfigure(0, weight=1) # Text column
+        content_frame.grid_columnconfigure(1, weight=0) # Icon column (fixed size)
+
+
+        # Icon Label (placed on the right in the content_frame grid for RTL)
+        if icon:
+            icon_label = CTkLabel(
+                content_frame,
+                text=icon,
+                font=("Arial", 16), # Slightly larger font for icon
+                text_color="black", # Gray color for the icon
+                fg_color="transparent"
+            )
+            icon_label.grid(row=0, column=1, sticky="e", padx=(0, 5)) # Place icon on the right, add left padding
+            icon_label.bind("<Button-1>", on_click) # Bind click event
+            icon_label.bind("<Enter>", on_enter) # Bind hover enter event
+            icon_label.bind("<Leave>", on_leave) # Bind hover leave event
+
+        # Text Label (placed on the left in the content_frame grid for RTL)
+        text_label = CTkLabel(
+            content_frame,
+            text=(text+" "), # Use the original text
+            font=("Arial", 14, "bold"),
+            text_color="white", # White color for the text
+            fg_color="transparent",
+            anchor="e" # Align text to the right
+        )
+        text_label.grid(row=0, column=0, sticky="ew") # Place text on the left, allow it to expand
+        text_label.bind("<Button-1>", on_click) # Bind click event
+        text_label.bind("<Enter>", on_enter) # Bind hover enter event
+        text_label.bind("<Leave>", on_leave) # Bind hover leave event
+
+
+        # Bind hover events to the main button frame
+        button_frame.bind("<Enter>", on_enter)
+        button_frame.bind("<Leave>", on_leave)
+
+        # Store the frame reference
+        return button_frame
 
     def _create_content_area(self, parent):
         """Create the main content area."""

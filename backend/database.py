@@ -112,6 +112,19 @@ def create_teacher_salaries_table():
     conn.commit()
     conn.close()
 
+def create_settings_table():
+    """Creates the settings table if it doesn't already exist."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
 # --- Data Insertion ---
 
 def add_student(name, nid, term, gender, phone1, phone2, fees, fee_dates):
@@ -207,6 +220,20 @@ def add_activity(description, date):
     """, (description, date))
     conn.commit()
     conn.close()
+
+def save_setting(key, value):
+    """Saves a key-value pair setting into the settings table."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        create_settings_table() # Ensure table exists
+        cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"Database error saving setting '{key}': {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 # --- Data Retrieval ---
 
@@ -363,6 +390,21 @@ def get_total_teacher_salaries():
     total = cursor.fetchone()[0]
     conn.close()
     return total or 0
+
+def get_setting(key):
+    """Retrieves the value for a given setting key from the settings table."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        create_settings_table() # Ensure table exists
+        cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except sqlite3.Error as e:
+        print(f"Database error getting setting '{key}': {e}")
+        return None
+    finally:
+        conn.close()
 
 # --- Statistical Summaries ---
 

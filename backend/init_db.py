@@ -6,7 +6,8 @@ from .database import (
     create_teachers_table,
     create_teacher_salaries_table,
     create_income_table,
-    create_activities_table
+    create_activities_table,
+    create_settings_table
 )
 
 def init_database():
@@ -18,6 +19,7 @@ def init_database():
     create_teacher_salaries_table()
     create_income_table()
     create_activities_table()
+    create_settings_table()
 
     # Optional: Print a success message (can be removed in production)
     # print("Database initialized successfully")

@@ -61,7 +61,7 @@ class TeacherRegistrationForm:
         # Teacher name
         ctk.CTkLabel(
             self.frame,
-            text=":اسم المعلمة",
+            text=":اسم المعلمة*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -77,7 +77,7 @@ class TeacherRegistrationForm:
         # National ID
         ctk.CTkLabel(
             self.frame,
-            text=":الرقم القومي",
+            text=":الرقم القومي*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -126,7 +126,7 @@ class TeacherRegistrationForm:
         # Primary phone
         ctk.CTkLabel(
             self.frame,
-            text=":هاتف المعلمة",
+            text=":هاتف المعلمة*",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1
@@ -142,7 +142,7 @@ class TeacherRegistrationForm:
         # Secondary phone
         ctk.CTkLabel(
             self.frame,
-            text=":هاتف آخر*",
+            text=":هاتف آخر",
             **LABEL_STYLE
         ).grid(row=row, column=1, sticky="e", pady=(10, 2), padx=(0, 10))
         row += 1

@@ -55,6 +55,7 @@ class SearchPage(ctk.CTkFrame):
         Includes the top bar, search filters, and the scrollable results frame.
         """
         # The frame is now 'self' because the class inherits from CTkFrame
+        self.configure(fg_color="gray95") # Set background color to very light gray (appears white)
         self.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         # Configure grid for layout: top bar, filters, and expandable results area
         self.grid_rowconfigure(0, weight=0) # Top bar (fixed height)
@@ -69,7 +70,7 @@ class SearchPage(ctk.CTkFrame):
 
     def _setup_top_bar(self):
         """Sets up the top bar with back button and search mode selector."""
-        top_bar = ctk.CTkFrame(self)
+        top_bar = ctk.CTkFrame(self, fg_color="gray95") # Set background color to very light gray (appears white)
         top_bar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         # Configure grid within top_bar for RTL layout: [Back Button] [Title (if any)] [Mode Selector]
         top_bar.grid_columnconfigure(0, weight=0) # Back button column (fixed size)
@@ -104,7 +105,7 @@ class SearchPage(ctk.CTkFrame):
 
     def _setup_filters(self):
         """Sets up the search filter components."""
-        filters_frame = ctk.CTkFrame(self)
+        filters_frame = ctk.CTkFrame(self, fg_color="gray95") # Set background color to very light gray (appears white)
         filters_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
         # Configure grid within filters_frame for RTL layout: [Academic Level Menu] [Academic Level Label] [Name Entry] [Search Button]
         filters_frame.grid_columnconfigure(0, weight=1) # Academic Level Menu (expands)
@@ -202,10 +203,8 @@ class SearchPage(ctk.CTkFrame):
             students: A list of dictionaries, each representing a student record.
         """
         # Define headers for student results (order adjusted for RTL display)
-        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number
-        # Map logical header order to RTL grid column index (0 is leftmost, increases to the right)
-        # The physical column index will be from right to left for display
-        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3} # Actions -> Col 0, Name -> Col 2, Term -> Col 1, Serial -> Col 3
+        headers = ["الإجراءات", "الفصل", "الاسم", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number
+   
 
         # Create header row frame inside the scrollable frame
         header_frame = ctk.CTkFrame(self.results_scroll_frame, fg_color="gray50") # Add a background color for header
@@ -301,9 +300,8 @@ class SearchPage(ctk.CTkFrame):
             teachers: A list of dictionaries, each representing a teacher record.
         """
         # Define headers for teacher results (order adjusted for RTL display)
-        headers = ["الإجراءات", "الاسـم", "الفصل", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number
-        # Map logical header order to RTL grid column index (0 is leftmost, increases to the right)
-        header_column_map_rtl = {0: 0, 1: 2, 2: 1, 3: 3} # Actions -> Col 0, Name -> Col 2, Term -> Col 1, Serial -> Col 3
+        headers = ["الإجراءات", "الفصل", "الاسم", "الرقم التسلسلي"] # Actions | Name | Term | Serial Number 
+      
 
         # Create header row frame inside the scrollable frame
         header_frame = ctk.CTkFrame(self.results_scroll_frame, fg_color="gray50") # Add a background color for header

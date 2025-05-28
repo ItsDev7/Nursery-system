@@ -66,7 +66,7 @@ class StatisticsPage:
     def _create_main_frame(self):
         """Create and configure the main frame with grid layout."""
         # Create main frame
-        self.main_frame = CTkFrame(self.main)
+        self.main_frame = CTkFrame(self.main, fg_color=self.main.cget('fg_color'))
         self.main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         
         # Configure main window grid
