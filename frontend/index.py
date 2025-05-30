@@ -206,7 +206,7 @@ class NextPage:
         
         title = CTkLabel(
             header_frame,
-            text=self.arabic("لوحة معلومات حضانة الندى"),
+            text=self.arabic("لوحة المعلومات عن الحضانة"),
             font=("Arial Black", 32),
             text_color="white"
         )
@@ -364,7 +364,7 @@ class NextPage:
         
         info_title = CTkLabel(
             info_frame,
-            text=self.arabic("معلومات عن حضانة الندى"),
+            text=self.arabic("اهداف الحضانة"),
             font=("Arial", 20, "bold"),
             text_color="#333"
         )
@@ -535,7 +535,7 @@ class NextPage:
         # Logo
         logo_label = CTkLabel(
             sidebar,
-            text=self.arabic("      حضانة الندى"),
+            text=self.arabic("      حضانة القدس"),
             font=("Arial Black", 20),
             text_color="white"
         )
@@ -551,7 +551,7 @@ class NextPage:
         # Dashboard button
         self.nav_buttons["dashboard"] = self._create_nav_button(
             parent, 1,
-            self.arabic("لوحة المعلومات"),
+            self.arabic("الصفحة الرئيسية"),
             self.show_dashboard,
             icon="🏠", # Home icon
             active_color="#3489f1"

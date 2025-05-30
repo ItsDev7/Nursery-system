@@ -82,22 +82,22 @@ class Main:
         # Apply the scaling factor to the UI
         self.main_window.tk.call("tk", "scaling", scaling_factor)
         
-        # Optional: Print scaling information for development (can be removed in final version)
+        # Optional: Print scaling information for development 
         # print(f"Screen size: {screen_width}x{screen_height}, Aspect Ratio: {aspect_ratio:.2f}, Scaling Factor: {scaling_factor:.2f}")
 
     
     def setup_main_window(self):
         """Configures the main application window."""
         # Set window title
-        self.main_window.title("EL-NADA Nursery")
+        self.main_window.title("سيستم الحضانة")
         
         # Load application icon
-        icon_path = os.path.join(Path(__file__).resolve().parent, "images", "ELNADA-icon.ico")
+        icon_path = os.path.join(Path(__file__).resolve().parent, "images", "Nursery-icon.ico")
         try:
             self.main_window.iconbitmap(icon_path)
         except:
             # Ignore error if icon file is not found
-            # print("Warning: Icon file not found.") # Removed print statement
+            # print("Warning: Icon file not found.") 
             pass
         
         # Enable window resizing (re-confirming)

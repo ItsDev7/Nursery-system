@@ -1,3 +1,20 @@
+# Virtual Environment
 venv/
+env/
+
+# Build files
+build/
+dist/
+*.spec
+
+# Credentials
+credentials.json
+token.json
+
+# Python cache
 __pycache__/
 *.pyc
+
+# IDE files
+.vscode/
+.idea/
