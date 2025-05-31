@@ -24,21 +24,7 @@ This system was developed using the Python programming language and the CustomTk
 - PyInstaller (for converting code to executable)
 - `arabic-reshaper` and `python-bidi` (for Arabic language support)
 
-## Screenshots
 
-![Dashboard](docs/images/Dashboard.png)
-
-![Fees and Income/Expenses Page](docs/images/Fees and IncomeExpenses Page.png)
-
-![Search Page](docs/images/Search Page.png)
-
-![Settings Page](docs/images/Settings Page.png)
-
-![Statistics and Reports Page](docs/images/Statistics and Reports Page.png)
-
-![Student Registration Page](docs/images/Student Registration Page.png)
-
-![Teacher Registration Page](docs/images/Teacher Registration Page.png)
 
 ## Setup and Installation
 
@@ -95,6 +81,12 @@ To run the project from source code on your machine, follow these steps:
     python main.py
     ```
 
+**Default Login Credentials:**
+For initial access to the application, use the following default credentials:
+
+Username: `admin`
+Password: `admin123`
+
 ## Building an Executable
 
 If you want to build an executable version of the system (e.g., an `.exe` file on Windows), you can use the provided scripts with PyInstaller.
@@ -111,6 +103,24 @@ If you want to build an executable version of the system (e.g., an `.exe` file o
   ```
 
 The resulting executable will be found in the `dist` folder.
+
+## Screenshots
+![Login Page](docs/images/Login.png)
+
+![Dashboard](docs/images/Dashboard.png)
+
+![Student Registration Page](docs/images/Student-Registration-Page.png)
+
+![Teacher Registration Page](docs/images/Teacher-Registration-Page.png)
+
+![Search Page](docs/images/Search-Page.png)
+
+![Fees and Income/Expenses age](docs/images/Fees-and-IncomeExpenses-Page.png)
+
+![Statistics and Reports Page](docs/images/Statistics-and-Reports-Page.png)
+
+![Settings Page](docs/images/Settings-Page.png)
+
 
 ## Download Pre-built Version
 
