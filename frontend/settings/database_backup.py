@@ -1,5 +1,5 @@
 """
-Database backup module for Elnada Kindergarten Management System.
+Database backup module for Management System.
 This module handles database backup operations including local and Google Drive backups.
 """
 
@@ -46,7 +46,7 @@ class DatabaseBackup:
         self.SCOPES = ['https://www.googleapis.com/auth/drive.file']
         self.creds = None
         self.drive_service = None
-        self.drive_folder_name = "Elnada_Backup"
+        self.drive_folder_name = "System_Backup"
         self.auth_callback = None
 
     def create_backup_folder(self, backup_path):
@@ -109,9 +109,9 @@ class DatabaseBackup:
         # or in a user data directory. For simplicity, let's try next to the executable first.
         # In one-file mode, os.path.dirname(sys.executable) is the dir of the exe.
         if getattr(sys, 'frozen', False):
-            token_dir = os.path.join(os.path.dirname(sys.executable), "Elnada_Backup_Tokens")
+            token_dir = os.path.join(os.path.dirname(sys.executable), "Tokens")
         else:
-            token_dir = os.path.join(os.getcwd(), "Elnada_Backup_Tokens")
+            token_dir = os.path.join(os.getcwd(), "Tokens")
 
         if not os.path.exists(token_dir):
             os.makedirs(token_dir)
@@ -201,9 +201,9 @@ class DatabaseBackup:
             
             # Token pickle should be stored in a writable location
             if getattr(sys, 'frozen', False):
-                token_dir = os.path.join(os.path.dirname(sys.executable), "Elnada_Backup_Tokens")
+                token_dir = os.path.join(os.path.dirname(sys.executable), "Tokens")
             else:
-                token_dir = os.path.join(os.getcwd(), "Elnada_Backup_Tokens")
+                token_dir = os.path.join(os.getcwd(), "Tokens")
 
             if not os.path.exists(token_dir):
                 os.makedirs(token_dir)
@@ -406,7 +406,7 @@ class DatabaseBackup:
     def check_and_backup(self):
         """Check if automatic backup is needed and perform it if necessary."""
         current_time = datetime.now()
-        last_backup_file = os.path.join(os.getcwd(), "Elnada_Backup", "last_backup.txt")
+        last_backup_file = os.path.join(os.getcwd(), "System_Backup", "last_backup.txt")
 
         last_backup_time = None
         if os.path.exists(last_backup_file):
@@ -424,7 +424,7 @@ class DatabaseBackup:
 
             if saved_path:
                 self.backup_database(saved_path, is_automatic=True)
-                self.save_last_backup_time(os.path.join(os.getcwd(), "Elnada_Backup", "last_backup.txt"))
+                self.save_last_backup_time(os.path.join(os.getcwd(), "System_Backup", "last_backup.txt"))
 
         self.parent_frame.after(3600000, self.check_and_backup)
 
@@ -439,7 +439,7 @@ class DatabaseBackup:
         Args:
             file_path: Path to save the backup time to
         """
-        backup_dir_for_time_file = os.path.join(os.getcwd(), "Elnada_Backup")
+        backup_dir_for_time_file = os.path.join(os.getcwd(), "System_Backup")
         if not os.path.exists(backup_dir_for_time_file):
             os.makedirs(backup_dir_for_time_file)
 

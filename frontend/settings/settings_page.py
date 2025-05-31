@@ -1,5 +1,5 @@
 """
-Settings module for Elnada Kindergarten Management System.
+Settings module for Management System.
 This module handles the settings interface and backup operations.
 """
 
@@ -11,7 +11,6 @@ from bidi.algorithm import get_display
 import threading
 import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
-import webbrowser
 
 # Local imports
 from .database_backup import DatabaseBackup
@@ -374,7 +373,7 @@ class SettingsPage(CTkFrame):
 {message}
 
 تم حفظ البيانات بنجاح على Google Drive.
-يمكنك الوصول إلى النسخة الاحتياطية في مجلد "Elnada_Backup" على حسابك.
+يمكنك الوصول إلى النسخة الاحتياطية في مجلد "System_Backup" على حسابك.
 """
                 processed_message = (full_message)
                 messagebox.showinfo(

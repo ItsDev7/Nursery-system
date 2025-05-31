@@ -1,5 +1,5 @@
 """
-Main application window and navigation for Elnada Kindergarten Management System.
+Main application window and navigation forManagement System.
 This module handles the main application window, navigation, and dashboard functionality.
 """
 

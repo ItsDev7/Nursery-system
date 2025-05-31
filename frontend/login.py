@@ -1,5 +1,5 @@
 """
-Login module for Elnada Kindergarten Management System.
+Login module for Management System.
 This module handles user authentication and login interface.
 """
 # Standard library imports

@@ -1,5 +1,5 @@
 """
-Statistics and Reports module for Elnada Kindergarten Management System.
+Statistics and Reports module for Management System.
 This module handles the display of various statistics and reports including:
 - Financial summary
 - Teacher statistics

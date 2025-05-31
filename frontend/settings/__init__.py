@@ -1,5 +1,5 @@
 """
-Settings package for Elnada Kindergarten Management System.
+Settings package for Management System.
 This package handles all settings-related functionality.
 """
 
